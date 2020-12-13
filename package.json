@@ -1,0 +1,51 @@
+{
+  "name": "manga2kindle_server-worker",
+  "version": "1.0.0",
+  "description": "Manga2Kindle Server Worker",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc && cd dist && functions-framework --target=lambdaHandler",
+    "test:lint": "eslint lib --ext .ts",
+    "test:lint:fix": "eslint lib --ext .ts --fix",
+    "prettier": "prettier '{lib,test}/**/*.ts' --write"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Manga2Kindle/server-worker.git"
+  },
+  "keywords": [
+    "manga",
+    "kindle",
+    "e-reader"
+  ],
+  "author": {
+    "name": "Eduardo Fernandez",
+    "email": "yo@edufdez.es"
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "bugs": {
+    "url": "https://github.com/Manga2Kindle/server-worker/issues"
+  },
+  "homepage": "https://github.com/Manga2Kindle/server-worker#readme",
+  "devDependencies": {
+    "@google-cloud/functions-framework": "^1.7.1",
+    "@types/axios": "^0.14.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.9",
+    "@types/node": "^14.14.10",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "eslint": "^7.14.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.2.0",
+    "prettier": "^2.2.1",
+    "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.803.0",
+    "axios": "^0.21.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  }
+}

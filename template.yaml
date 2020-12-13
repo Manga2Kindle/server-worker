@@ -1,0 +1,6 @@
+Resources:
+  Manga2Kindle_server-worker:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist
+      Handler: index.lambdaHandler
