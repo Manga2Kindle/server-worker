@@ -53,3 +53,9 @@ test/**/*.js.map
 /public
 /dist
 .env
+
+# kindlegen
+kindlegen/kindlegen
+
+# kindle comic converter
+kcc-master/*
