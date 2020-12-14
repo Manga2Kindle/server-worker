@@ -9,6 +9,9 @@ import { STATUS } from "./models/Status";
 import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
 import { access, mkdir, writeFile } from "fs";
+import { exec } from "child_process";
+import { FolderToEpub } from "./utils/kcc";
+import { zipDirectory, unZipDirectory } from "./utils/ziputils";
 
 Axios.defaults.baseURL = env.API_URL;
 Axios.defaults.timeout = 1000;
@@ -35,13 +38,14 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       const existDir = promisify(access);
       const makeDir = promisify(mkdir);
 
-      existDir(tmpFolder)
+      await existDir(tmpFolder)
         .catch(() => makeDir(tmpFolder))
         .then(() => existDir(idFolder))
         .catch(() => makeDir(idFolder));
 
       //#endregion
       //#region download files
+
       const s3 = new S3Storage();
 
       const getFileList = promisify(s3.getFileList);
@@ -70,23 +74,53 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
             });
           });
         });
+
       //#endregion
       //#region create epub
 
-      wf(resolve(idFolder, "mimetype"), "application/epub+zip");
-      wf(resolve(idFolder, "mimetype"), "application/epub+zip");
+      const options = {
+        style: "manga",
+        splitter: 2
+      };
 
-      //#endregion
+      await FolderToEpub(idFolder, options).catch((err) => {
+        console.error(err);
+        throw new Error("Cant convert to epub");
+      });
+
+      console.log(`${idFolder}.epub`);
+      await unZipDirectory(`${idFolder}.epub`, `${idFolder}_unzip`).catch((err) => {
+        console.error(err);
+        throw new Error("nono");
+      });
+
+      // edit metadata
 
       // change status
       changeStatus(id, STATUS.CONVERTING);
 
+      //#endregion
+
       // zip epub
+
+      // zipDirectory(idFolder, `${idFolder}.epub`)
+      //   .then(() => {
+      //     // change status
+      //     changeStatus(id, STATUS.CONVERTING);
+
+      //     // convert to mobi
+      //     return epubToMobi(`${idFolder}.epub`);
+      //   })
+      //   .then((output) => console.log(output))
+      //   .catch((err) => {
+      //     console.error(err);
+      //     throw new Error("Cant convert epub");
+      //   });
 
       // change status
       changeStatus(id, STATUS.SENDING);
 
-      // send epub
+      // send mobi
 
       // change status
       changeStatus(id, STATUS.DONE);
@@ -123,4 +157,22 @@ function changeStatus(id: string | number, status: string | number) {
     .catch((error) => {
       throw error;
     });
+}
+
+function epubToMobi(filePath: string): Promise<string> {
+  const path = resolve(__dirname, "../kindlegen/kindlegen");
+
+  return new Promise((resolve, reject) => {
+    const comand = '"' + path + '" -dont_append_source -locale en "' + filePath + '"';
+
+    exec(comand, (error, stdout, stderr) => {
+      if (error) {
+        return reject(error);
+      }
+      if (stderr) {
+        return reject(Error(stderr));
+      }
+      resolve(stdout);
+    });
+  });
 }
