@@ -10,8 +10,8 @@ import { resolve } from "path";
 const kccPath = resolve(__dirname, "../../kcc-master/kcc-c2e.py");
 
 export interface KccOptions {
-  style: string;
-  splitter: number;
+  style?: string;
+  splitter?: number;
 }
 
 /**
@@ -31,8 +31,8 @@ export function folderToEpub(folderName: string, options: KccOptions): Promise<s
 
     // TODO: let the user put some more options (device, 4panel...)
     if (options) {
-      style = options.style ? options.style : style;
-      splitter = Number.isInteger(options.splitter) ? options.splitter : splitter;
+      style = options.style || style;
+      splitter = options.splitter || splitter;
     }
 
     let comand = 'python3 "' + kccPath + '" -p KV -g 1.0 --forcecolor';
