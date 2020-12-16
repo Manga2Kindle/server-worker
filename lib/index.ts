@@ -9,7 +9,6 @@ import { STATUS } from "./models/Status";
 import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
 import { access, mkdir, writeFile } from "fs";
-import { exec } from "child_process";
 import { folderToEpub } from "./utils/kcc";
 import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
@@ -104,19 +103,23 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
 
       // zip epub
 
-      // zipDirectory(idFolder, `${idFolder}.epub`)
-      //   .then(() => {
-      //     // change status
-      //     changeStatus(id, STATUS.CONVERTING);
+      await zipDirectory(`${idFolder}_unzip`, `${idFolder}.epub`)
+        .then((output) => console.log(output))
+        .catch((err) => {
+          console.error(err);
+          throw new Error("Cant convert epub");
+        });
 
-      //     // convert to mobi
-      //     return epubToMobi(`${idFolder}.epub`);
-      //   })
-      //   .then((output) => console.log(output))
-      //   .catch((err) => {
-      //     console.error(err);
-      //     throw new Error("Cant convert epub");
-      //   });
+      // change status
+      changeStatus(id, STATUS.CONVERTING);
+
+      // convert to mobi
+      await epubToMobi(`${idFolder}.epub`)
+        .then((output) => console.log(output))
+        .catch((err) => {
+          console.error(err);
+          throw new Error("Cant convert epub");
+        });
 
       // change status
       changeStatus(id, STATUS.SENDING);
