@@ -14,6 +14,9 @@ import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
 import { Builder, parseStringPromise } from "xml2js";
 import { Metadata } from "./models/Metadata";
+import { createTransport } from "nodemailer";
+import SMTPTransport = require("nodemailer/lib/smtp-transport");
+import Mail = require("nodemailer/lib/mailer");
 
 Axios.defaults.baseURL = env.API_URL;
 Axios.defaults.timeout = 1000;
@@ -134,7 +137,13 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       // change status
       changeStatus(id, STATUS.SENDING);
 
-      // send mobi
+      // send mobi TODO: put email var
+      await sendFile(`${idFolder}.mobi`, "email")
+        .then((val) => console.log(val))
+        .catch((err) => {
+          console.error(err);
+          throw new Error("Cant send email");
+        });
 
       //#endregion
       // change status
@@ -192,4 +201,34 @@ async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
 
   // convert to xml again
   writeFileSync(OEBPS_path, new Builder().buildObject(OEBPS_data));
+}
+
+function sendFile(filePath: string, mailTo: string): Promise<SMTPTransport.SentMessageInfo> {
+  const config: SMTPTransport.Options = {
+    host: env.MAIL_HOST,
+    port: parseInt(env.MAIL_PORT || "465"),
+    secure: env.MAIL_SECURE == "true",
+    auth: {
+      user: env.MAIL_USERNAME,
+      pass: env.MAIL_PASSWORD
+    }
+  };
+
+  const transporter = createTransport(config);
+
+  const mailOptions: Mail.Options = {
+    from: env.MAIL_SENDER,
+    to: mailTo,
+    subject: "[Manga2Kindle] Here is your Manga!",
+    text: "I'm here again to deliver your manga!\n You will find it attached to this email.\n -- The Manga2Kindle Bot",
+    html:
+      "Hey there!<br><br>I'm here again to deliver your manga!<br>You can find it attached to this email.<br><br> <i>Bop Bee Boo,</i><br>The Manga2Kindle Bot",
+    attachments: [{ path: filePath }]
+  };
+
+  if (env.MAIL_REPLY_TO && env.MAIL_REPLY_TO !== "") {
+    mailOptions.replyTo = process.env.MAIL_REPLY_TO;
+  }
+
+  return transporter.sendMail(mailOptions);
 }
