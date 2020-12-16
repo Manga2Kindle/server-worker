@@ -106,22 +106,19 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
 
       await metadataEditor(`${idFolder}_unzip`, metadata);
 
+      //#endregion
+      //#region zip and convert to mobi
+
       // change status
       changeStatus(id, STATUS.CONVERTING);
 
-      //#endregion
-
       // zip epub
-
       await zipDirectory(`${idFolder}_unzip`, `${idFolder}.epub`)
         .then((output) => console.log(output))
         .catch((err) => {
           console.error(err);
           throw new Error("Cant convert epub");
         });
-
-      // change status
-      changeStatus(id, STATUS.CONVERTING);
 
       // convert to mobi
       await epubToMobi(`${idFolder}.epub`)
@@ -131,15 +128,18 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
           throw new Error("Cant convert epub");
         });
 
+      //#endregion
+      //#region send file
+
       // change status
       changeStatus(id, STATUS.SENDING);
 
       // send mobi
 
+      //#endregion
       // change status
       changeStatus(id, STATUS.DONE);
 
-      // delete files
     } else {
       res.status(400).send("Bad Request");
     }
@@ -181,7 +181,7 @@ async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
   if (!OEBPS_data) {
     throw new Error("No data parsed");
   }
-  
+
   // edit json, add meta
   OEBPS_data.package.metadata[0]["dc:title"][0] = data.title;
   OEBPS_data.package.metadata[0]["dc:creator"][0] = { _: data.author, $: { "opf:file-as": data.author, "opf:role": "aut" } };
