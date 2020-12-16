@@ -10,7 +10,7 @@ import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
 import { access, mkdir, writeFile } from "fs";
 import { exec } from "child_process";
-import { FolderToEpub } from "./utils/kcc";
+import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
 
 Axios.defaults.baseURL = env.API_URL;
@@ -157,22 +157,4 @@ function changeStatus(id: string | number, status: string | number) {
     .catch((error) => {
       throw error;
     });
-}
-
-function epubToMobi(filePath: string): Promise<string> {
-  const path = resolve(__dirname, "../kindlegen/kindlegen");
-
-  return new Promise((resolve, reject) => {
-    const comand = '"' + path + '" -dont_append_source -locale en "' + filePath + '"';
-
-    exec(comand, (error, stdout, stderr) => {
-      if (error) {
-        return reject(error);
-      }
-      if (stderr) {
-        return reject(Error(stderr));
-      }
-      resolve(stdout);
-    });
-  });
 }
