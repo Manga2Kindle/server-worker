@@ -182,8 +182,6 @@ async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
     throw new Error("No data parsed");
   }
   
-  console.log(OEBPS_data.package.metadata[0])
-
   // edit json, add meta
   OEBPS_data.package.metadata[0]["dc:title"][0] = data.title;
   OEBPS_data.package.metadata[0]["dc:creator"][0] = { _: data.author, $: { "opf:file-as": data.author, "opf:role": "aut" } };
@@ -192,8 +190,6 @@ async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
   OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "group-position" }, _: data.chapter });
   OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "dcterms:identifier" }, _: data.identifier });
   OEBPS_data.package.metadata[0]["dc:contributor"][0]._ = "Manga2Kindle v" + require("../package.json").version;
-
-  console.log(OEBPS_data.package.metadata[0])
 
   // convert to xml again
   writeFileSync(OEBPS_path, new Builder().buildObject(OEBPS_data));
