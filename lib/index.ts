@@ -9,10 +9,11 @@ import { STATUS } from "./models/Status";
 import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
 import { access, mkdir, readFileSync, writeFile, writeFileSync } from "fs";
-import { folderToEpub } from "./utils/kcc";
+import { folderToEpub, KccOptions } from "./utils/kcc";
 import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
 import { Builder, parseStringPromise } from "xml2js";
+import { Metadata } from "./models/Metadata";
 
 Axios.defaults.baseURL = env.API_URL;
 Axios.defaults.timeout = 1000;
@@ -79,7 +80,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       //#endregion
       //#region create epub
 
-      const options = {
+      const options: KccOptions = {
         style: "manga",
         splitter: 2
       };
@@ -95,7 +96,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       });
 
       // edit metadata
-      const metadata = {
+      const metadata: Metadata = {
         title: "My test file",
         manga: "Test Manga",
         author: "EduFdezSoy",
@@ -172,7 +173,7 @@ function changeStatus(id: string | number, status: string | number) {
     });
 }
 
-async function metadataEditor(epubUnzipedPath: string, data: any) {
+async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
   // convert xml to json
   const OEBPS_path = join(epubUnzipedPath, "/OEBPS/content.opf");
   const OEBPS_data = await parseStringPromise(readFileSync(OEBPS_path));
@@ -191,7 +192,7 @@ async function metadataEditor(epubUnzipedPath: string, data: any) {
   OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "group-position" }, _: data.chapter });
   OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "dcterms:identifier" }, _: data.identifier });
   OEBPS_data.package.metadata[0]["dc:contributor"][0]._ = "Manga2Kindle v" + require("../package.json").version;
-  
+
   console.log(OEBPS_data.package.metadata[0])
 
   // convert to xml again
