@@ -17,6 +17,7 @@ import { Metadata } from "./models/Metadata";
 import { createTransport } from "nodemailer";
 import SMTPTransport = require("nodemailer/lib/smtp-transport");
 import Mail = require("nodemailer/lib/mailer");
+import { Chapter } from "./models/Chapter";
 
 Axios.defaults.baseURL = env.API_URL;
 Axios.defaults.timeout = 1000;
@@ -80,12 +81,14 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
           });
         });
 
+        const chapterData: Chapter = JSON.parse(readFileSync(resolve(idFolder, "ChapterData.json"), "utf8"))
+
       //#endregion
       //#region create epub
 
       const options: KccOptions = {
-        style: "manga",
-        splitter: 2
+        style: chapterData.readMode,
+        splitter: chapterData.splitType
       };
 
       await folderToEpub(idFolder, options).catch((err) => {
@@ -100,11 +103,11 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
 
       // edit metadata
       const metadata: Metadata = {
-        title: "My test file",
-        manga: "Test Manga",
-        author: "EduFdezSoy",
-        chapter: "2",
-        identifier: "uuid:whatever"
+        title: chapterData.title!,
+        manga: chapterData.manga!.title!,
+        author: chapterData.manga!.author!.toString(), // TODO: try this
+        chapter: chapterData.chapter!,
+        identifier: chapterData.manga!.uuid!
       };
 
       await metadataEditor(`${idFolder}_unzip`, metadata);
@@ -137,8 +140,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       // change status
       changeStatus(id, STATUS.SENDING);
 
-      // send mobi TODO: put email var
-      await sendFile(`${idFolder}.mobi`, "email")
+      await sendFile(`${idFolder}.mobi`, chapterData.email!)
         .then((val) => console.log(val))
         .catch((err) => {
           console.error(err);
