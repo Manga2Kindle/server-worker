@@ -8,10 +8,11 @@ import { env } from "process";
 import { STATUS } from "./models/Status";
 import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
-import { access, mkdir, writeFile } from "fs";
+import { access, mkdir, readFileSync, writeFile, writeFileSync } from "fs";
 import { folderToEpub } from "./utils/kcc";
 import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
+import { Builder, parseStringPromise } from "xml2js";
 
 Axios.defaults.baseURL = env.API_URL;
 Axios.defaults.timeout = 1000;
@@ -88,13 +89,21 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
         throw new Error("Cant convert to epub");
       });
 
-      console.log(`${idFolder}.epub`);
       await unZipDirectory(`${idFolder}.epub`, `${idFolder}_unzip`).catch((err) => {
         console.error(err);
         throw new Error("nono");
       });
 
       // edit metadata
+      const metadata = {
+        title: "My test file",
+        manga: "Test Manga",
+        author: "EduFdezSoy",
+        chapter: "2",
+        identifier: "uuid:whatever",
+      };
+
+      await metadataEditor(`${idFolder}_unzip`, metadata);
 
       // change status
       changeStatus(id, STATUS.CONVERTING);
@@ -161,4 +170,30 @@ function changeStatus(id: string | number, status: string | number) {
     .catch((error) => {
       throw error;
     });
+}
+
+async function metadataEditor(epubUnzipedPath: string, data: any) {
+  // convert xml to json
+  const OEBPS_path = join(epubUnzipedPath, "/OEBPS/content.opf");
+  const OEBPS_data = await parseStringPromise(readFileSync(OEBPS_path));
+
+  if (!OEBPS_data) {
+    throw new Error("No data parsed");
+  }
+  
+  console.log(OEBPS_data.package.metadata[0])
+
+  // edit json, add meta
+  OEBPS_data.package.metadata[0]["dc:title"][0] = data.title;
+  OEBPS_data.package.metadata[0]["dc:creator"][0] = { _: data.author, $: { "opf:file-as": data.author, "opf:role": "aut" } };
+  OEBPS_data.package.metadata[0].meta.push({ $: { property: "belongs-to-collection", id: "c01" }, _: data.manga });
+  OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "collection-type" }, _: "series" });
+  OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "group-position" }, _: data.chapter });
+  OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "dcterms:identifier" }, _: data.identifier });
+  OEBPS_data.package.metadata[0]["dc:contributor"][0]._ = "Manga2Kindle v" + require("../package.json").version;
+  
+  console.log(OEBPS_data.package.metadata[0])
+
+  // convert to xml again
+  writeFileSync(OEBPS_path, new Builder().buildObject(OEBPS_data));
 }
