@@ -10,8 +10,8 @@ import { resolve } from "path";
 const kccPath = resolve(__dirname, "../../kcc-master/kcc-c2e.py");
 
 export interface KccOptions {
-  style: string,
-  splitter: number
+  style: string;
+  splitter: number;
 }
 
 /**

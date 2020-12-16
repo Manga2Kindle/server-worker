@@ -101,7 +101,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
         manga: "Test Manga",
         author: "EduFdezSoy",
         chapter: "2",
-        identifier: "uuid:whatever",
+        identifier: "uuid:whatever"
       };
 
       await metadataEditor(`${idFolder}_unzip`, metadata);
@@ -139,7 +139,6 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       //#endregion
       // change status
       changeStatus(id, STATUS.DONE);
-
     } else {
       res.status(400).send("Bad Request");
     }
