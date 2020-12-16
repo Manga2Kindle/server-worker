@@ -1,6 +1,6 @@
 import * as archiver from "archiver";
 import { Error } from "aws-sdk/clients/servicecatalog";
-import { createWriteStream, createReadStream, readdirSync } from "fs";
+import { createWriteStream, createReadStream } from "fs";
 import { Extract } from "unzipper";
 
 export function zipDirectory(source: string, out: string): Promise<void> {
