@@ -35,7 +35,7 @@ export function folderToEpub(folderName: string, options: KccOptions): Promise<s
       splitter = Number.isInteger(options.splitter) ? options.splitter : splitter;
     }
 
-    let comand = 'python3 "' + kccPath + '" -p KV';
+    let comand = 'python3 "' + kccPath + '" -p KV -g 1.0 --forcecolor';
 
     switch (style) {
       case "manga":
