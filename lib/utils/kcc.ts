@@ -16,7 +16,7 @@ const kccPath = resolve(__dirname, "../../kcc-master/kcc-c2e.py");
  * @param {Array} options can be null (will pick default values)
  * @return {Promise} on resolve returns (stdout)
  */
-export function FolderToEpub(folderName: string, options: any): Promise<string | Error> {
+export function folderToEpub(folderName: string, options: any): Promise<string | Error> {
   return new Promise((resolve, reject) => {
     let style = "manga"; // can be manga, webtoon or comic (others = comic)
     let splitter = 0; // double page parsing mode. 0: Split 1: Rotate 2: Both

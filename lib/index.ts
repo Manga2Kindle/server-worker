@@ -10,6 +10,7 @@ import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
 import { access, mkdir, writeFile } from "fs";
 import { exec } from "child_process";
+import { folderToEpub } from "./utils/kcc";
 import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
 
@@ -83,7 +84,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
         splitter: 2
       };
 
-      await FolderToEpub(idFolder, options).catch((err) => {
+      await folderToEpub(idFolder, options).catch((err) => {
         console.error(err);
         throw new Error("Cant convert to epub");
       });
