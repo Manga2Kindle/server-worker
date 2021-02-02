@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && cd dist && functions-framework --target=lambdaHandler",
+    "start": "cd dist && functions-framework --target=lambdaHandler",
     "test:lint": "eslint lib --ext .ts",
     "test:lint:fix": "eslint lib --ext .ts --fix",
     "prettier": "prettier '{lib,test}/**/*.ts' --write"
