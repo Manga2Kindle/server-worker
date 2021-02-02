@@ -81,7 +81,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
           });
         });
 
-        const chapterData: Chapter = JSON.parse(readFileSync(resolve(idFolder, "ChapterData.json"), "utf8"))
+      const chapterData: Chapter = JSON.parse(readFileSync(resolve(idFolder, "ChapterData.json"), "utf8"))
 
       //#endregion
       //#region create epub
@@ -146,6 +146,12 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
           console.error(err);
           throw new Error("Cant send email");
         });
+
+      //#endregion
+      //#region delete files
+
+      const delFile = promisify(s3.deleteFile);
+      await delFile(id);
 
       //#endregion
       // change status
