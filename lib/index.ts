@@ -165,6 +165,8 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
     }
     changeStatus(req.params[0], STATUS.ERROR);
     console.error(error);
+  } finally {
+    process.exit();
   }
 };
 
