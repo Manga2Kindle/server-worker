@@ -40,7 +40,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
 
       //#region create folders
 
-      const tmpFolder = resolve(__dirname, "../tmp");
+      const tmpFolder = resolve("/tmp", "Manga2Kindle");
       const idFolder = resolve(tmpFolder, id);
       const existDir = promisify(access);
       const makeDir = promisify(mkdir);
