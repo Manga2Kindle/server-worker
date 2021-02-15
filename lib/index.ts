@@ -210,7 +210,8 @@ async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
   OEBPS_data.package.metadata[0]["dc:contributor"][0]._ = "Manga2Kindle v" + require("../package.json").version;
 
   // convert to xml again
-  writeFileSync(OEBPS_path, new Builder().buildObject(OEBPS_data));
+  const xmlOEBPS = new Builder().buildObject(OEBPS_data);
+  writeFileSync(OEBPS_path, xmlOEBPS);
 }
 
 function sendFile(filePath: string, mailTo: string): Promise<SMTPTransport.SentMessageInfo> {
