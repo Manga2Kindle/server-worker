@@ -61,30 +61,14 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       const getFile = promisify(s3.getFile);
       const wf = promisify(writeFile);
 
-      getFileList(id)
-        .then((metadata) => {
-          const fileList: string[] = [];
+      const filelist = await getFileList(id);
+      for (let i = 0; i < filelist.Contents.length; i++) {
+        const data = filelist.Contents[i];
+        const fileData = await getFile(data.Key);
+        await wf(resolve(tmpFolder, data.Key), fileData.Body);
+      }
 
-          metadata.Contents.forEach((data: any) => {
-            fileList.push(data.Key);
-          });
-
-          return fileList;
-        })
-        .then((fileList) => {
-          const fileDonloaded: boolean[] = [];
-          for (let i = 0; i < fileList.length; i++) {
-            fileDonloaded.push(false);
-          }
-
-          fileList.forEach((fileKey) => {
-            getFile(fileKey).then((data) => {
-              wf(resolve(tmpFolder, fileKey), data.Body);
-            });
-          });
-        });
-
-      const chapterData: Chapter = JSON.parse(readFileSync(resolve(idFolder, "ChapterData.json"), "utf8"))
+      const chapterData: Chapter = JSON.parse(readFileSync(resolve(idFolder, "ChapterData.json"), "utf8"));
 
       //#endregion
       //#region create epub
@@ -94,15 +78,13 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
         splitter: chapterData.splitType
       };
 
-      await folderToEpub(idFolder, options).catch((err) => {
-        console.error(err);
+      const fteRes = await folderToEpub(idFolder, options);
+      if (fteRes instanceof Error) {
+        console.error(fteRes);
         throw new Error("Cant convert to epub");
-      });
+      }
 
-      await unZipDirectory(`${idFolder}.epub`, `${idFolder}_unzip`).catch((err) => {
-        console.error(err);
-        throw new Error("nono");
-      });
+      await unZipDirectory(`${idFolder}.epub`, `${idFolder}_unzip`);
 
       // edit metadata
       const metadata: Metadata = {
