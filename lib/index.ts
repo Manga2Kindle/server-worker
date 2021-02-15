@@ -8,7 +8,7 @@ import { env } from "process";
 import { STATUS } from "./models/Status";
 import S3Storage from "./utils/S3Storage";
 import { promisify } from "util";
-import { access, mkdir, readFileSync, writeFile, writeFileSync } from "fs";
+import { access, chmodSync, mkdir, readFileSync, rmdirSync, writeFile, writeFileSync } from "fs";
 import { folderToEpub, KccOptions } from "./utils/kcc";
 import { epubToMobi } from "./utils/kindlegen";
 import { zipDirectory, unZipDirectory } from "./utils/ziputils";
@@ -49,6 +49,8 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
         .catch(() => makeDir(tmpFolder))
         .then(() => existDir(idFolder))
         .catch(() => makeDir(idFolder));
+
+      chmodSync(tmpFolder, 0o777);
 
       //#endregion
       //#region download files
@@ -151,8 +153,12 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       //#endregion
       //#region delete files
 
+      // delete from bucket
       const delFile = promisify(s3.deleteFile);
       await delFile(id);
+
+      // delete from system
+      rmdirSync(tmpFolder, { recursive: true });
 
       //#endregion
       // change status
