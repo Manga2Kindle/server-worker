@@ -18,6 +18,7 @@ import { createTransport } from "nodemailer";
 import SMTPTransport = require("nodemailer/lib/smtp-transport");
 import Mail = require("nodemailer/lib/mailer");
 import { Chapter } from "./models/Chapter";
+import { Author } from "./models/Author";
 
 Axios.defaults.baseURL = env.API_URL;
 Axios.defaults.timeout = 1000;
@@ -103,9 +104,9 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
 
       // edit metadata
       const metadata: Metadata = {
-        title: chapterData.title!,
+        title: formTitle(chapterData),
         manga: chapterData.manga!.title!,
-        author: chapterData.manga!.author!.toString(), // TODO: try this
+        author: authorToString(chapterData.manga!.author),
         chapter: chapterData.chapter!,
         identifier: chapterData.manga!.uuid!
       };
@@ -242,4 +243,50 @@ function sendFile(filePath: string, mailTo: string): Promise<SMTPTransport.SentM
   }
 
   return transporter.sendMail(mailOptions);
+}
+
+function authorToString(author?: Author[]): string {
+  let authorStr = "";
+  const authorArr: string[] = [];
+
+  if (author) {
+    for (let i = 0; i < author.length; i++) {
+      const authorName = author[i].name;
+      if (authorName) {
+        authorArr.push(authorName);
+      }
+    }
+
+    authorStr = authorArr.join(", ");
+  }
+
+  return authorStr;
+}
+
+function formTitle(chapter: Chapter): string {
+  let title = "";
+
+  if (chapter.manga!.title) {
+    title += chapter.manga!.title;
+    title += " ";
+  }
+  if (chapter.volume) {
+    title += "Vol.";
+    title += chapter.volume;
+    title += " ";
+  }
+  if (chapter.chapter) {
+    title += "Ch.";
+    title += chapter.chapter;
+    title += " ";
+  }
+
+  title.trim();
+
+  if (chapter.title) {
+    title += " - ";
+    title += chapter.title;
+  }
+
+  return title.trim();
 }
