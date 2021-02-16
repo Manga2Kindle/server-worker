@@ -2,7 +2,7 @@ import { join, resolve } from "path";
 import { config } from "dotenv";
 config({ path: resolve(__dirname, "../.env") });
 
-import Axios from "axios";
+import Axios, { AxiosResponse } from "axios";
 import { Request, Response } from "express";
 import { env } from "process";
 import { STATUS } from "./models/Status";
@@ -36,7 +36,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       res.send(`will do ${id}`);
 
       // change status
-      changeStatus(id, STATUS.PROCESSING);
+      await changeStatus(id, STATUS.PROCESSING);
 
       //#region create folders
 
@@ -101,7 +101,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       //#region zip and convert to mobi
 
       // change status
-      changeStatus(id, STATUS.CONVERTING);
+      await changeStatus(id, STATUS.CONVERTING);
 
       // zip epub
       await zipDirectory(`${idFolder}_unzip`, `${idFolder}.epub`)
@@ -123,7 +123,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
       //#region send file
 
       // change status
-      changeStatus(id, STATUS.SENDING);
+      await changeStatus(id, STATUS.SENDING);
 
       await sendFile(`${idFolder}.mobi`, chapterData.email!)
         .then((val) => console.log(val))
@@ -144,7 +144,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
 
       //#endregion
       // change status
-      changeStatus(id, STATUS.DONE);
+      await changeStatus(id, STATUS.DONE);
     } else {
       res.status(400).send("Bad Request");
     }
@@ -152,7 +152,7 @@ export const lambdaHandler = async (req: Request, res: Response): Promise<void> 
     if (!res.writableEnded) {
       res.status(500).send(error.message);
     }
-    changeStatus(req.params[0], STATUS.ERROR);
+    await changeStatus(req.params[0], STATUS.ERROR);
     console.error(error);
   } finally {
     process.exit();
@@ -167,17 +167,13 @@ function isNaturalNumber(x: unknown): boolean {
   return !isNaN(n1) && n2 === n1 && n1.toString() == n;
 }
 
-function changeStatus(id: string | number, status: string | number) {
+async function changeStatus(id: string | number, status: string | number) {
   const url = join("chapter", id.toString(), status.toString());
-  Axios.patch(url)
-    .then((res) => {
-      if (res.status != 204) {
-        throw new Error("response to an status change was an error");
-      }
-    })
-    .catch((error) => {
-      throw error;
-    });
+  
+  let res: AxiosResponse<any> = await Axios.patch(url);
+  if (res.status != 204) {
+    throw new Error("response to an status change was an error");
+  }
 }
 
 async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
