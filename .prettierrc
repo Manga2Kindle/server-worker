@@ -1,6 +1,6 @@
 {
   "printWidth": 140,
-  "bracketSpacing": true,
+  "bracketSpacing": false,
   "trailingComma": "none",
   "arrowParens": "always"
 }

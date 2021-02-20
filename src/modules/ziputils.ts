@@ -1,4 +1,4 @@
-import * as archiver from "archiver";
+import archiver = require("archiver");
 import { Error } from "aws-sdk/clients/servicecatalog";
 import { createWriteStream, createReadStream } from "fs";
 import { Extract } from "unzipper";
@@ -10,7 +10,7 @@ export function zipDirectory(source: string, out: string): Promise<void> {
   return new Promise((resolve, reject) => {
     archive
       .directory(source, false)
-      .on("error", (err) => reject(err))
+      .on("error", (err: any) => reject(err))
       .pipe(stream);
 
     stream.on("close", () => resolve());

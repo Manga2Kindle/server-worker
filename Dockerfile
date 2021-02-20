@@ -45,3 +45,25 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 EXPOSE 8080
 
 CMD ["./run.sh"]
+
+
+# THIS IS THE DEFAULT TSED DOKERFILE:
+
+# FROM node:12.13.0-alpine
+
+# RUN apk update && apk add build-base git python
+
+# COPY package.json .
+# COPY yarn.lock .
+# COPY ./src ./src
+# COPY ./dist ./dist
+# COPY ./resources ./resources
+# COPY ./spec ./spec
+
+# RUN yarn install --production
+
+# EXPOSE 8081
+# ENV PORT 8081
+# ENV NODE_ENV production
+
+# CMD ["yarn", "start:prod"]

@@ -1,3 +1,5 @@
+import { Property } from "@tsed/schema";
+
 export const STATUS = {
   REGISTERED: 10,
   UPLOADING: 20,
@@ -11,7 +13,10 @@ export const STATUS = {
 };
 
 export class Status {
+  @Property()
   public id?: number;
+  @Property()
   public status?: number;
+  @Property()
   public pages?: number;
 }
