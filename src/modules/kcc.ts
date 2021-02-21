@@ -4,8 +4,8 @@
  * @author Eduardo Fernandez
  */
 
-import { exec, ExecException } from "child_process";
-import { resolve } from "path";
+import {exec, ExecException} from "child_process";
+import {resolve} from "path";
 
 const kccPath = resolve(__dirname, "../../kcc-master/kcc-c2e.py");
 

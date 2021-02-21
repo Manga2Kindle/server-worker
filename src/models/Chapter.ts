@@ -1,5 +1,5 @@
-import { Property } from "@tsed/schema";
-import { Manga } from "./Manga";
+import {Property} from "@tsed/schema";
+import {Manga} from "./Manga";
 
 export class Chapter {
   @Property()

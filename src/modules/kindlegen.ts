@@ -4,8 +4,8 @@
  * @author Eduardo Fernandez
  */
 
-import { exec, ExecException } from "child_process";
-import { resolve } from "path";
+import {exec, ExecException} from "child_process";
+import {resolve} from "path";
 
 const path = resolve(__dirname, "../../kindlegen/kindlegen");
 

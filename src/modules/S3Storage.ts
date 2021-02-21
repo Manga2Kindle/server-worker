@@ -1,4 +1,4 @@
-import { AWSError, S3 } from "aws-sdk";
+import {AWSError, S3} from "aws-sdk";
 import s3 from "../config/S3Config";
 
 export default class S3Storage {

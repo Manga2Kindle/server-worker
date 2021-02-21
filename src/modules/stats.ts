@@ -1,4 +1,4 @@
-import { $log } from "@tsed/common";
+import {$log} from "@tsed/common";
 
 export default class Stats {
   private static _instance: Stats;

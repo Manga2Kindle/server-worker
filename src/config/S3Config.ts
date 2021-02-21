@@ -1,4 +1,4 @@
-import { Credentials, Endpoint, S3 } from "aws-sdk";
+import {Credentials, Endpoint, S3} from "aws-sdk";
 
 const s3 = new S3();
 s3.config.credentials = new Credentials(process.env.S3_ACCESS_KEY_ID as string, process.env.S3_SECRET_ACCESS_KEY as string);

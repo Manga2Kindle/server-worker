@@ -1,6 +1,6 @@
-import { Env } from "@tsed/core";
-import { Configuration, Inject } from "@tsed/di";
-import { $log, PlatformApplication } from "@tsed/common";
+import {Env} from "@tsed/core";
+import {Configuration, Inject} from "@tsed/di";
+import {$log, PlatformApplication} from "@tsed/common";
 import "@tsed/platform-express"; // /!\ keep this import
 import bodyParser from "body-parser";
 import compress from "compression";
@@ -9,7 +9,6 @@ import methodOverride from "method-override";
 import cors from "cors";
 import "@tsed/ajv";
 import "@tsed/swagger";
-
 
 export const rootDir = __dirname;
 export const isProduction = process.env.NODE_ENV === Env.PROD;
@@ -65,8 +64,10 @@ export class Server {
       .use(compress({}))
       .use(methodOverride())
       .use(bodyParser.json())
-      .use(bodyParser.urlencoded({
-        extended: true
-      }));
+      .use(
+        bodyParser.urlencoded({
+          extended: true
+        })
+      );
   }
 }

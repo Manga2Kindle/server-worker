@@ -1,4 +1,4 @@
-import { Property } from "@tsed/schema";
+import {Property} from "@tsed/schema";
 
 export const STATUS = {
   REGISTERED: 10,
