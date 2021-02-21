@@ -1,31 +1,24 @@
-import { $log, Controller, Get, PathParams, Put, Res } from "@tsed/common";
-import { BadRequest } from "@tsed/exceptions";
-import { Returns } from "@tsed/schema";
-import { Response } from "express";
-import { access, chmodSync, mkdir, readFileSync, rmdirSync, writeFile } from "fs";
-import { resolve } from "path";
-import { promisify } from "util";
-import { Chapter } from "../models/Chapter";
-import { Metadata } from "../models/Metadata";
-import { STATUS } from "../models/Status";
-import { changeStatus } from "../modules/apiApiService";
-import { authorToString, formTitle, metadataEditor, sendFile } from "../modules/conversionUtils";
-import { isNaturalNumber } from "../modules/DataValidation";
-import { folderToEpub, KccOptions } from "../modules/kcc";
-import { epubToMobi } from "../modules/kindlegen";
+import {$log, Controller, Get, PathParams, Put, Res} from "@tsed/common";
+import {BadRequest} from "@tsed/exceptions";
+import {Returns} from "@tsed/schema";
+import {Response} from "express";
+import {access, chmodSync, mkdir, readFileSync, rmdirSync, writeFile} from "fs";
+import {resolve} from "path";
+import {promisify} from "util";
+import {Chapter} from "../models/Chapter";
+import {Metadata} from "../models/Metadata";
+import {STATUS} from "../models/Status";
+import {changeStatus} from "../modules/apiApiService";
+import {authorToString, formTitle, metadataEditor, sendFile} from "../modules/conversionUtils";
+import {isNaturalNumber} from "../modules/DataValidation";
+import {folderToEpub, KccOptions} from "../modules/kcc";
+import {epubToMobi} from "../modules/kindlegen";
 import S3Storage from "../modules/S3Storage";
 import Stats from "../modules/stats";
-import { unZipDirectory, zipDirectory } from "../modules/ziputils";
+import {unZipDirectory, zipDirectory} from "../modules/ziputils";
 
 @Controller("/")
-export class BaseController {
-  @Get("/")
-  getStats() {
-    return {
-      jobsDone: Stats.Instance.jobsDone
-    };
-  }
-
+export class WorkerController {
   @Get("/status")
   getStatus() {
     return {
@@ -156,21 +149,18 @@ export class BaseController {
       await delFile(id.toString());
 
       // delete from system
-      rmdirSync(tmpFolder, { recursive: true });
+      rmdirSync(tmpFolder, {recursive: true});
 
       //#endregion
       await changeStatus(id, STATUS.DONE);
-      
     } catch (error) {
       Stats.Instance.jobFailed();
       $log.error(`Worker failed: ${error.message}`);
 
       await changeStatus(id, STATUS.ERROR);
       console.error(error);
-
     } finally {
       Stats.Instance.workerDone();
     }
-
   }
 }
