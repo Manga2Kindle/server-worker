@@ -4,6 +4,7 @@ export default class Stats {
   private static _instance: Stats;
   private free = true;
   private jobs = 0;
+  private failedJobs = 0;
 
   private constructor() {
     $log.info("Instanciate Stats");
@@ -35,6 +36,14 @@ export default class Stats {
 
   public jobsDone(): number {
     return this.jobs;
+  }
+
+  public jobFailed() {
+    this.failedJobs++;
+  }
+
+  public jobsFailed(): number {
+    return this.failedJobs;
   }
 
   //TODO: add average time, average pages, error rate...
