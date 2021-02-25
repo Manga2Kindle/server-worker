@@ -1,11 +1,13 @@
 import {Controller, Get} from "@tsed/common";
+import Stats from "../modules/stats";
 
 @Controller("/")
 export class InitController {
   @Get("/register")
   getStats() {
     return {
-      self: process.env.SELF_URL
+      worker: process.env.SELF_URL,
+      free: Stats.Instance.isWorkerFree()
     };
   }
 }
