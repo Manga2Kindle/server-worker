@@ -35,7 +35,7 @@ if (isProduction) {
   rootDir,
   acceptMimes: ["application/json"],
   httpPort: process.env.PORT || 8083,
-  httpsPort: false, // CHANGE
+  httpsPort: process.env.HTTPS || false,
   logger: {
     disableRoutesSummary: isProduction
   },
