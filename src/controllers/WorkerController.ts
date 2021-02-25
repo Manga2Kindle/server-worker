@@ -13,6 +13,7 @@ import {authorToString, formTitle, metadataEditor, sendFile} from "../modules/co
 import {isNaturalNumber} from "../modules/DataValidation";
 import {folderToEpub, KccOptions} from "../modules/kcc";
 import {epubToMobi} from "../modules/kindlegen";
+import { done } from "../modules/queueApiService";
 import S3Storage from "../modules/S3Storage";
 import Stats from "../modules/stats";
 import {unZipDirectory, zipDirectory} from "../modules/ziputils";
@@ -161,6 +162,7 @@ export class WorkerController {
       console.error(error);
     } finally {
       Stats.Instance.workerDone();
+      await done();
     }
   }
 }
