@@ -7,6 +7,7 @@ import {PlatformExpress} from "@tsed/platform-express";
 import {Server} from "./Server";
 import Stats from "./modules/stats";
 import {checkEnvVars} from "./modules/DataValidation";
+import {register} from "./modules/queueApiService";
 
 async function bootstrap() {
   try {
@@ -21,6 +22,9 @@ async function bootstrap() {
 
     await platform.listen();
     $log.debug("Server initialized");
+
+    // register worker
+    await register();
   } catch (er) {
     $log.error(er);
   }
