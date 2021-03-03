@@ -1,4 +1,4 @@
-import { $log } from "@tsed/common";
+import {$log} from "@tsed/common";
 import axios, {AxiosResponse} from "axios";
 import {join} from "path";
 
