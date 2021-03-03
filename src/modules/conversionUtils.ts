@@ -24,7 +24,7 @@ export async function metadataEditor(epubUnzipedPath: string, data: Metadata) {
   OEBPS_data.package.metadata[0].meta.push({$: {refines: "#c01", property: "collection-type"}, _: "series"});
   OEBPS_data.package.metadata[0].meta.push({$: {refines: "#c01", property: "group-position"}, _: data.chapter});
   // OEBPS_data.package.metadata[0].meta.push({ $: { refines: "#c01", property: "dcterms:identifier" }, _: data.identifier }); // TODO: ESTA LINEA FALLA
-  OEBPS_data.package.metadata[0]["dc:contributor"][0]._ = "Manga2Kindle v" + require("../package.json").version;
+  OEBPS_data.package.metadata[0]["dc:contributor"][0]._ = "Manga2Kindle v" + require("../../package.json").version;
 
   // convert to xml again
   const xmlOEBPS = new Builder().buildObject(OEBPS_data);
