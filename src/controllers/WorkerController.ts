@@ -2,7 +2,7 @@ import {$log, Controller, Get, PathParams, Put, Res} from "@tsed/common";
 import {BadRequest} from "@tsed/exceptions";
 import {Returns} from "@tsed/schema";
 import {Response} from "express";
-import {access, chmodSync, mkdir, readFileSync, rmdirSync, writeFile} from "fs";
+import {access, chmodSync, mkdir, readFileSync, rmSync, writeFile} from "fs";
 import {resolve} from "path";
 import {promisify} from "util";
 import {Chapter} from "../models/Chapter";
@@ -150,7 +150,7 @@ export class WorkerController {
       await delFile(id.toString());
 
       // delete from system
-      rmdirSync(tmpFolder, {recursive: true});
+      rmSync(tmpFolder, {recursive: true, force: true})
 
       //#endregion
       await changeStatus(id, STATUS.DONE);
