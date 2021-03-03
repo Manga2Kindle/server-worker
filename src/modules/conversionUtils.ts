@@ -1,4 +1,4 @@
-import {readFileSync, writeFileSync} from "fs";
+import {existsSync, lstatSync, readdirSync, readFileSync, rmdirSync, unlinkSync, writeFileSync} from "fs";
 import {createTransport} from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
@@ -106,3 +106,20 @@ export function formTitle(chapter: Chapter): string {
 
   return title.trim();
 }
+
+export const deleteFolderRecursive = function (directoryPath: string) {
+  // since Node 0.1.30
+  if (existsSync(directoryPath)) {
+    readdirSync(directoryPath).forEach((file, _index) => {
+      const curPath = join(directoryPath, file);
+      if (lstatSync(curPath).isDirectory()) {
+        // recurse
+        deleteFolderRecursive(curPath);
+      } else {
+        // delete file
+        unlinkSync(curPath);
+      }
+    });
+    rmdirSync(directoryPath);
+  }
+};

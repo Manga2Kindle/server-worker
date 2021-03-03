@@ -2,18 +2,18 @@ import {$log, Controller, Get, PathParams, Put, Res} from "@tsed/common";
 import {BadRequest} from "@tsed/exceptions";
 import {Returns} from "@tsed/schema";
 import {Response} from "express";
-import {access, chmodSync, mkdir, readFileSync, rmSync, writeFile} from "fs";
+import {access, chmodSync, mkdir, readFileSync, rmdirSync, rmSync, writeFile} from "fs";
 import {resolve} from "path";
 import {promisify} from "util";
 import {Chapter} from "../models/Chapter";
 import {Metadata} from "../models/Metadata";
 import {STATUS} from "../models/Status";
 import {changeStatus} from "../modules/apiApiService";
-import {authorToString, formTitle, metadataEditor, sendFile} from "../modules/conversionUtils";
+import {authorToString, deleteFolderRecursive, formTitle, metadataEditor, sendFile} from "../modules/conversionUtils";
 import {isNaturalNumber} from "../modules/DataValidation";
 import {folderToEpub, KccOptions} from "../modules/kcc";
 import {epubToMobi} from "../modules/kindlegen";
-import { done } from "../modules/queueApiService";
+import {done} from "../modules/queueApiService";
 import S3Storage from "../modules/S3Storage";
 import Stats from "../modules/stats";
 import {unZipDirectory, zipDirectory} from "../modules/ziputils";
@@ -150,7 +150,18 @@ export class WorkerController {
       await delFile(id.toString());
 
       // delete from system
-      rmSync(tmpFolder, {recursive: true, force: true})
+      const nodeVersion = process.versions.node.split(".").map(Number);
+
+      if (nodeVersion[0] >= 14 && nodeVersion[1] >= 14) {
+        // since Node 14.14.0
+        rmSync(tmpFolder, {recursive: true, force: true});
+      } else if (nodeVersion[0] >= 12 && nodeVersion[1] >= 10) {
+        // since Node 12.10.0
+        rmdirSync(tmpFolder, {recursive: true});
+      } else {
+        // since Node 0.1.30
+        deleteFolderRecursive(tmpFolder);
+      }
 
       //#endregion
       await changeStatus(id, STATUS.DONE);
